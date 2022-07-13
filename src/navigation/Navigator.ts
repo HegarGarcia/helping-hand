@@ -1,10 +1,8 @@
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
-
+import PasswordResetScreen from "../screens/authentication/PasswordResetScreen";
 import SignInScreen from "../screens/authentication/SignInScreen";
 import SignUpScreen from "../screens/authentication/SignUpScreen";
-import PasswordResetScreen from "../screens/authentication/PasswordResetScreen";
-
 import MapScreen from "../screens/MapScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
@@ -12,7 +10,7 @@ const AuthStack = createStackNavigator(
   {
     SignIn: SignInScreen,
     SignUp: SignUpScreen,
-    PasswordReset: PasswordResetScreen
+    PasswordReset: PasswordResetScreen,
   },
   { headerMode: "none" }
 );
@@ -20,7 +18,7 @@ const AuthStack = createStackNavigator(
 export const AppStack = createStackNavigator(
   {
     Map: MapScreen,
-    Profile: ProfileScreen
+    Profile: ProfileScreen,
   },
   { headerMode: "none" }
 );
@@ -28,10 +26,10 @@ export const AppStack = createStackNavigator(
 export const AuthNavigator = createAppContainer(
   createSwitchNavigator(
     {
-      Auth: AuthStack
+      Auth: AuthStack,
     },
     {
-      initialRouteName: "Auth"
+      initialRouteName: "Auth",
     }
   )
 );
@@ -39,10 +37,10 @@ export const AuthNavigator = createAppContainer(
 export const AppNavigator = createAppContainer(
   createSwitchNavigator(
     {
-      App: AppStack
+      App: AppStack,
     },
     {
-      initialRouteName: "App"
+      initialRouteName: "App",
     }
   )
 );

@@ -1,41 +1,34 @@
-import React, { FC, useState } from "react";
+import { useCallback, useState } from "react";
 import { View } from "react-native";
-import {
-  Button,
-  TextInput,
-  Title,
-  HelperText,
-  Avatar
-} from "react-native-paper";
+import { Avatar, Button, HelperText, TextInput } from "react-native-paper";
 import { NavigationScreenProp } from "react-navigation";
-
-import { signInWithEmailAndPassword } from "../../authentication/authenticateWithEmailAndPassword";
 import Validator from "validator";
-import styles from "./styles";
+import { signInWithEmailAndPassword } from "../../authentication/authenticateWithEmailAndPassword";
 import { Spacing } from "../../styles/base";
+import styles from "./styles";
 
 interface SignInScreenProps {
   navigation: NavigationScreenProp<any, any>;
 }
 
-const SignInScreen: FC<SignInScreenProps> = props => {
+export default function SignInScreen(props: SignInScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [isValidEmail, setIsValidEmail] = useState(true);
   const [isValidPassword, setIsValidPassword] = useState(true);
 
-  const valdateEmail = () => setIsValidEmail(Validator.isEmail(email));
-  const validatePassword = () => setIsValidPassword(password.length >= 8);
+  const valdateEmail = useCallback(() => setIsValidEmail(Validator.isEmail(email)), []);
+  const validatePassword = useCallback(() => setIsValidPassword(password.length >= 8), []);
 
-  const goToSignUp = () => props.navigation.navigate("SignUp");
-  const goToPasswordReset = () => props.navigation.navigate("PasswordReset");
+  const goToSignUp = useCallback(() => props.navigation.navigate("SignUp"), [props.navigation.navigate]);
+  const goToPasswordReset = useCallback(() => props.navigation.navigate("PasswordReset"), [props.navigation.navigate]);
 
-  const signIn = () => {
+  const signIn = useCallback(() => {
     if (isValidEmail && isValidPassword) {
       signInWithEmailAndPassword({ email, password });
     }
-  };
+  }, [isValidEmail, isValidPassword]);
 
   return (
     <View style={styles.container}>
@@ -46,50 +39,45 @@ const SignInScreen: FC<SignInScreenProps> = props => {
       />
 
       <TextInput
-        autoCompleteType='email'
-        mode='outlined'
+        autoCompleteType="email"
+        mode="outlined"
         style={styles.textInput}
         onChangeText={setEmail}
         onEndEditing={valdateEmail}
         value={email}
-        label='Email'
+        label="Email"
       />
 
-      <HelperText type='error' visible={!isValidEmail}>
+      <HelperText type="error" visible={!isValidEmail}>
         ¡El email no es válido!
       </HelperText>
 
       <TextInput
-        autoCompleteType='off'
-        mode='outlined'
+        autoCompleteType="off"
+        mode="outlined"
         style={styles.textInput}
         secureTextEntry={true}
         onChangeText={setPassword}
         onEndEditing={validatePassword}
         value={password}
-        label='Contraseña'
+        label="Contraseña"
       />
 
-      <HelperText type='error' visible={!isValidPassword}>
+      <HelperText type="error" visible={!isValidPassword}>
         La contraseña invalida
       </HelperText>
 
-      <Button mode='contained' style={styles.actionButton} onPress={signIn}>
+      <Button mode="contained" style={styles.actionButton} onPress={signIn}>
         Iniciar Sesión
       </Button>
 
-      <Button mode='text' style={styles.actionButton} onPress={goToSignUp}>
+      <Button mode="text" style={styles.actionButton} onPress={goToSignUp}>
         Registrate
       </Button>
 
-      <Button
-        mode='text'
-        style={styles.actionButton}
-        onPress={goToPasswordReset}>
+      <Button mode="text" style={styles.actionButton} onPress={goToPasswordReset}>
         ¿Olvidaste tu contraseña?
       </Button>
     </View>
   );
-};
-
-export default SignInScreen;
+}

@@ -5,17 +5,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 30
+    padding: 30,
   },
   title: {
-    textAlign: "center"
+    textAlign: "center",
   },
   textInput: {
-    marginVertical: Spacing.sm
+    marginVertical: Spacing.sm,
   },
   actionButton: {
-    marginVertical: Spacing.sm
-  }
+    marginVertical: Spacing.sm,
+  },
 });
 
 export default styles;

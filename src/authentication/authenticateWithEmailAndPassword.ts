@@ -1,30 +1,28 @@
 import { auth } from "firebase";
 import { Alert } from "react-native";
 
-interface EmailAndPassword {
+interface SignUpWithEmailAndPasswordParams {
   email: string;
   password: string;
-  username?: string;
+  username: string;
 }
 
-export const signUpWithEmailAndPassword = async ({
+export async function signUpWithEmailAndPassword({
   email,
   password,
-  username
-}: EmailAndPassword) => {
-  let errorMessage = "";
+  username,
+}: SignUpWithEmailAndPasswordParams): Promise<void> {
+  let errorMessage: string;
 
   try {
-    const { user } = await auth().createUserWithEmailAndPassword(
-      email,
-      password
-    );
+    const { user } = await auth().createUserWithEmailAndPassword(email, password);
     await user.sendEmailVerification();
+
     if (user) {
       await user.updateProfile({ displayName: username });
     }
-  } catch (err) {
-    switch (err.code) {
+  } catch (error) {
+    switch (error.code) {
       case "auth/email-already-in-use":
         errorMessage = "Ya hay una cuenta registrada con su email";
         break;
@@ -40,21 +38,28 @@ export const signUpWithEmailAndPassword = async ({
   if (errorMessage) {
     Alert.alert("Error en creación de cuenta", errorMessage);
   }
-};
+}
 
-export const signInWithEmailAndPassword = async ({
-  email,
-  password
-}: EmailAndPassword) => {
-  let errorMessage = "";
+interface SignInWithEmailAndPasswordParams {
+  email: string;
+  password: string;
+}
+
+export async function signInWithEmailAndPassword({ email, password }: SignInWithEmailAndPasswordParams): Promise<void> {
+  let errorMessage: string;
+
   try {
     const { user } = await auth().signInWithEmailAndPassword(email, password);
+
     if (!user.emailVerified) {
-      auth().signOut();
+      await auth().signOut();
       Alert.alert("Cuenta no verificada", "Revisa tu correo");
+      return;
     }
-  } catch (err) {
-    switch (err.code) {
+
+    return;
+  } catch (error) {
+    switch (error.code) {
       case "auth/email-already-in-use":
         errorMessage = "Ya hay una cuenta create con tu email";
         break;
@@ -73,21 +78,23 @@ export const signInWithEmailAndPassword = async ({
   if (errorMessage) {
     Alert.alert("Error en inicio de sesión", errorMessage);
   }
-};
+}
 
-export const forgotMyPassword = async (email: string) => {
-  await auth()
-    .sendPasswordResetEmail(email)
-    .catch(err => {
-      let errorMessage = "";
-      switch (err.code) {
-        case "auth/user-not-found":
-          errorMessage = "Email no reigstrado";
-          break;
-      }
+export async function forgotMyPassword(email: string): Promise<void> {
+  try {
+    await auth().sendPasswordResetEmail(email);
+  } catch (error) {
+    let errorMessage: string;
 
-      if (errorMessage) {
-        Alert.alert("Error en recuperación de contraseña", errorMessage);
+    switch (error.code) {
+      case "auth/user-not-found": {
+        errorMessage = "Email no reigstrado";
+        break;
       }
-    });
-};
+    }
+
+    if (errorMessage) {
+      Alert.alert("Error en recuperación de contraseña", errorMessage);
+    }
+  }
+}

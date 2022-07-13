@@ -1,5 +1,7 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
+  "name": "helping-hand",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -38,6 +40,5 @@
   },
   "jest": {
     "preset": "react-native"
-  },
-  "private": true
+  }
 }

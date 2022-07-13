@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, View } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
 import { AppLoading } from "expo";
 import { apps, auth, initializeApp } from "firebase";
-
+import { useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Provider as PaperProvider } from "react-native-paper";
+import { UserContext } from "../authentication/userContext";
+import firebaseConfig from "../config/firebase";
 import { AppNavigator, AuthNavigator } from "../navigation/Navigator";
 import { Theme } from "../styles/base";
-import firebaseConfig from "../config/firebase";
-import { UserContext } from "../authentication/userContext";
 
-const MainScreen = () => {
+export default function MainScreen() {
   const [isFirebaseLoaded, setIsFirebaseLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { setUser } = useContext(UserContext);
@@ -22,28 +21,26 @@ const MainScreen = () => {
   }, []);
 
   useEffect(() => {
-    auth().onAuthStateChanged(authData => {
+    auth().onAuthStateChanged((authData) => {
       setIsLoggedIn(!!authData);
       setUser(authData);
     });
   }, []);
 
-  return isFirebaseLoaded ? (
+  if (!isFirebaseLoaded) {
+    return <AppLoading />;
+  }
+
+  return (
     <View style={styles.container}>
-      <PaperProvider theme={Theme}>
-        {isLoggedIn ? <AppNavigator /> : <AuthNavigator />}
-      </PaperProvider>
+      <PaperProvider theme={Theme}>{isLoggedIn ? <AppNavigator /> : <AuthNavigator />}</PaperProvider>
     </View>
-  ) : (
-    <AppLoading />
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff"
-  }
+    backgroundColor: "#fff",
+  },
 });
-
-export default MainScreen;

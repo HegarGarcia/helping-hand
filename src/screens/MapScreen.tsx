@@ -1,26 +1,20 @@
-import React, { useState, useEffect, FC } from "react";
-import { NavigationScreenProp } from "react-navigation";
-import { StyleSheet, View, Dimensions } from "react-native";
+import React, { FC, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { Dimensions, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { FAB, Appbar } from "react-native-paper";
-
+import { Appbar, FAB } from "react-native-paper";
+import { NavigationScreenProp } from "react-navigation";
 import ActionBar from "../components/ActionBar";
 import AddMarkerDialog from "../components/AddMarkerDialog";
 import MarkerDetailDialog from "../components/MarkerDetailDialog";
 import ProfileDetailDialog from "../components/ProfileDetailDialog";
-
-import Markers, {
-  IMarker,
-  GeoPoint,
-  Coordinates,
-  colorMapper
-} from "../database/markers";
+import Markers, { colorMapper, Coordinates, GeoPoint, IMarker } from "../database/markers";
 
 interface MapScreenProps {
   navigation: NavigationScreenProp<any, any>;
 }
 
-const MapScreen: FC<MapScreenProps> = ({ navigation }) => {
+export default function MapScreen({ navigation }: MapScreenProps) {
   const [markers, setMarkers] = useState<IMarker[]>([]);
   const [showAddMarkerDialog, setShowAddMarkerDialog] = useState(false);
   const [showMarkerDetail, setShowMarkerDetail] = useState(false);
@@ -28,51 +22,57 @@ const MapScreen: FC<MapScreenProps> = ({ navigation }) => {
   const [showProfileDetail, setShowProfileDetail] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<Coordinates>({
     latitude: 0,
-    longitude: 0
+    longitude: 0,
   });
 
   useEffect(() => {
     console.disableYellowBox = true;
     console.ignoredYellowBox = ["Setting timer"];
-  });
+  }, []);
 
   useEffect(() => {
-    (async () => {
+    async function fetchMarkers() {
       const snapshot = await Markers.getWithinRadius(
         20000,
         new GeoPoint(currentLocation.latitude, currentLocation.longitude)
       );
       setMarkers(
-        snapshot.docs
-          .map(doc => ({ ...doc.data(), id: doc.id } as IMarker))
-          .filter(marker => !marker.attended)
+        snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as IMarker)).filter((marker) => !marker.attended)
       );
-    })();
+    }
+
+    fetchMarkers();
   }, [currentLocation]);
 
-  const getMapRegion = () => ({
-    ...currentLocation,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005
-  });
+  const getMapRegion = useCallback(
+    () => ({
+      ...currentLocation,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    }),
+    [currentLocation]
+  );
 
-  const onUserLocationChange = event => {
+  const onUserLocationChange = useCallback((event: any) => {
     event.persist();
+
     const { coordinate } = event.nativeEvent;
     setCurrentLocation({
       latitude: coordinate.latitude,
-      longitude: coordinate.longitude
+      longitude: coordinate.longitude,
     });
-  };
-  const toggleAddMarker = () => setShowAddMarkerDialog(!showAddMarkerDialog);
-  const toggleMarkerDetailDialog = () => setShowMarkerDetail(!showMarkerDetail);
-  const toggleProfileDetail = () => setShowProfileDetail(!showProfileDetail);
+  }, []);
+
+  const toggleAddMarker = useCallback(() => setShowAddMarkerDialog(!showAddMarkerDialog), [showAddMarkerDialog]);
+  const toggleMarkerDetailDialog = useCallback(() => setShowMarkerDetail(!showMarkerDetail), [showMarkerDetail]);
+  const toggleProfileDetail = useCallback(() => setShowProfileDetail(!showProfileDetail), [showProfileDetail]);
 
   return (
     <>
       <ActionBar>
-        <Appbar.Action icon='account' onPress={toggleProfileDetail} />
+        <Appbar.Action icon="account" onPress={toggleProfileDetail} />
       </ActionBar>
+
       <View style={styles.container}>
         <MapView
           showsUserLocation
@@ -80,8 +80,9 @@ const MapScreen: FC<MapScreenProps> = ({ navigation }) => {
           loadingEnabled
           region={getMapRegion()}
           onUserLocationChange={onUserLocationChange}
-          style={styles.mapStyle}>
-          {markers.map(marker => (
+          style={styles.mapStyle}
+        >
+          {markers.map((marker) => (
             <Marker
               pinColor={colorMapper(marker.necessity)}
               title={"Marcador"}
@@ -95,7 +96,7 @@ const MapScreen: FC<MapScreenProps> = ({ navigation }) => {
           ))}
         </MapView>
 
-        <FAB style={styles.fab} icon='plus' onPress={toggleAddMarker} />
+        <FAB style={styles.fab} icon="plus" onPress={toggleAddMarker} />
 
         {showProfileDetail && (
           <ProfileDetailDialog
@@ -108,40 +109,32 @@ const MapScreen: FC<MapScreenProps> = ({ navigation }) => {
         )}
 
         {showMarkerDetail && (
-          <MarkerDetailDialog
-            toggleVisibility={toggleMarkerDetailDialog}
-            markerId={selectedMarker}
-          />
+          <MarkerDetailDialog toggleVisibility={toggleMarkerDetailDialog} markerId={selectedMarker} />
         )}
 
         {showAddMarkerDialog && (
-          <AddMarkerDialog
-            currentLocation={currentLocation}
-            toggleVisibility={toggleAddMarker}
-          />
+          <AddMarkerDialog currentLocation={currentLocation} toggleVisibility={toggleAddMarker} />
         )}
       </View>
     </>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   mapStyle: {
     width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height
+    height: Dimensions.get("window").height,
   },
   fab: {
     position: "absolute",
     margin: 16,
     right: 0,
-    bottom: 0
-  }
+    bottom: 0,
+  },
 });
-
-export default MapScreen;

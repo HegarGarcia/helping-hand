@@ -1,8 +1,7 @@
+import { GeoPoint as IGeoPoint } from "@firebase/firestore-types";
 import { firestore } from "firebase/app";
 import "firebase/firestore";
-
 import { GeoFirestore } from "geofirestore";
-import { GeoPoint as IGeoPoint } from "@firebase/firestore-types";
 import { Colors } from "react-native-paper";
 
 export interface Coordinates {
@@ -23,13 +22,12 @@ export interface IMarker {
 
 export const GeoPoint = firestore.GeoPoint;
 
-export const transformCoordinateToGeoPoint = ({
-  latitude,
-  longitude
-}: Coordinates) => new firestore.GeoPoint(latitude, longitude);
+export const transformCoordinateToGeoPoint = ({ latitude, longitude }: Coordinates) =>
+  new firestore.GeoPoint(latitude, longitude);
 
-export const colorMapper = (necessityType: string) => {
-  let color = "";
+export const colorMapper = (necessityType: string): string => {
+  let color: string;
+
   switch (necessityType) {
     case "food":
       color = Colors.green500;
@@ -68,24 +66,20 @@ export default class Markers {
   }
 
   static async get(id: string) {
-    return await Markers.getGeofireMarkersReference()
-      .doc(id)
-      .get();
+    return await Markers.getGeofireMarkersReference().doc(id).get();
   }
 
   static getWithinRadius(radius: number, center: Coordinates) {
     return Markers.getGeofireMarkersReference()
       .near({
         center: transformCoordinateToGeoPoint(center),
-        radius
+        radius,
       })
       .get();
   }
 
   static delete(id: string) {
-    Markers.getGeofireMarkersReference()
-      .doc(id)
-      .delete();
+    Markers.getGeofireMarkersReference().doc(id).delete();
   }
 
   static async markAsAttended(id: string) {
